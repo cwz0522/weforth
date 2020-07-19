@@ -1,0 +1,7 @@
+weforth start.
+KVMCreate
+memset
+add_basic_words(vm)
+addcompilerword(vm)
+KVMAddWord(vm, .greeting, KVMdotGreeting)
+: constant create , does> r> @ ;

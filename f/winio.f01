@@ -1,0 +1,78 @@
+
+findword winio.f01 ?stop-include-this-file  \ if defined then skip
+findword message_switch ?stop-include-this-line &vm->greetingswitch @ constant message_switch
+0 &vm->greetingswitch !          \ 0 to turn off .( messages ), others to turn on. Up to you.
+
+\ 透過 WinIO driver 在 Windows 下 access I/O and Physical memory         hcchen5600 2010/05/27 14:39:33 
+\ Forth : WF06.exe http://mfgkm-wks.wistron.com/RD/Software/Wistron%20EFI%20Forth%20Release%20Notes.aspx
+
+
+\ ib    [ port -- byte  ]
+\ iw    [ port -- word  ]
+\ id    [ port -- dword ]
+\ ob    [ port byte  -- ]
+\ ow    [ port word  -- ]
+\ od    [ port dword -- ]
+\ peekd [ address -- dword ] read physical memory
+\ poked [ address dword -- ] write physical memory
+
+.( loadlibrary WinIo32.dll )
+loadlibrary WinIo32.dll ?exit
+
+.( WinIo32.dll @ 0 winapi InitializeWinIo )
+WinIo32.dll @ 0 0 winapi InitializeWinIo ?exit    \ [ -- OK ]
+
+.( WinIo32.dll @ 0 winapi ShutdownWinIo )
+WinIo32.dll @ 0 0 winapi ShutdownWinIo ?exit      \ [ -- ]
+
+.( WinIo32.dll @ 2 winapi InstallWinIoDriver )
+WinIo32.dll @ 2 0 winapi InstallWinIoDriver ?exit \ [ IsDemandLoaded pszWinIoDriverPath -- OK ]
+
+.( WinIo32.dll @ 0 winapi RemoveWinIoDriver )
+WinIo32.dll @ 0 0 winapi RemoveWinIoDriver ?exit  \ [ -- OK ]
+
+.( WinIo32.dll @ 3 winapi GetPortVal )
+WinIo32.dll @ 3 0 winapi GetPortVal ?exit         \ [ wPortAddr pdwPortVal bSize -- OK ]
+
+.( WinIo32.dll @ 3 winapi SetPortVal )
+WinIo32.dll @ 3 0 winapi SetPortVal ?exit         \ [ wPortAddr dwPortVal bSize -- OK ]
+
+.( WinIo32.dll @ 2 winapi GetPhysLong )
+WinIo32.dll @ 2 0 winapi GetPhysLong ?exit        \ [ pbPhysAddr pdwPhysVal -- OK ]
+
+.( WinIo32.dll @ 2 winapi SetPhysLong )
+WinIo32.dll @ 2 0 winapi SetPhysLong ?exit        \ [ pbPhysAddr dwPhysVal -- OK ]
+
+: read-io           \ [ port size -- data ] read I/O port
+   >r >r            \ [d: ][r: wPortAddr size]
+   0 &TOS swap drop \ &dummy 在 stack 裡多塞一個 dummy cell 以供資料讀回時放這裡。
+   r> over r>       \ &dummy wPortAddr &dummy size
+   GetPortVal       \ data ok?
+   NOT if ." Fatal error, WinIO.GetPortVal failed. Forgot to InitializeWinIo or are you an administrator? " cr bye then ;
+: write-io          \ [ port data size -- ] write I/O port
+   SetPortVal       \ ok?
+   NOT if ." Fatal error, WinIO.SetPortVal failed. Forgot to InitializeWinIo or are you an administrator? " cr bye then ;
+: ib 1 read-io ;    \ [ port -- byte  ]
+: iw 2 read-io ;    \ [ port -- word  ]
+: id 4 read-io ;    \ [ port -- dword ]
+
+: ob 1 write-io ;   \ [ port byte  -- ]
+: ow 2 write-io ;   \ [ port word  -- ]
+: od 4 write-io ;   \ [ port dword -- ]
+
+: read-memory       \ [ address -- dword ] read physical memory
+   &TOS swap over   \ [ &dummy address &dummy ] 在 stack 裡多塞一個 dummy cell 以供資料讀回時放這裡。
+   GetPhysLong      \ data ok?
+   NOT if ." Fatal error, WinIO.GetPhysLong failed. Forgot to InitializeWinIo or are you an administrator? " cr bye then ;
+: write-memory      \ [ address dword -- ] write physical memory
+   SetPhysLong      \ ok?
+   NOT if ." Fatal error, WinIO.SetPhysLong failed. Forgot to InitializeWinIo or are you an administrator? " cr bye then ;
+alias read-memory  peekd
+alias write-memory poked
+
+.( InitializeWinIo *administrator permission needed* )
+InitializeWinIo NOT ?exit
+
+1 constant winio.f01
+.( finished compiling winio.fxx )
+message_switch &vm->greetingswitch ! \ restore .( messages ) switch

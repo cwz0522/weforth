@@ -1,0 +1,27 @@
+
+\
+\  Don't be scared by below Forth things. They are actually very easy. However, you care about only line 3-5,7,9,10,11.
+\
+\  utility.dll , Access32.sys is from WHQ TE. See WKS software RD Lawrence Tang's introductions
+\           http://elearnwksrd.wistron.com.cn/xms/content/show.php?id=1184
+\           http://elearnwksrd.wistron.com.cn/xms/forum/show.php?id=2587
+\  put wfxx.exe , this .f , utility.dll and Access32.sys at the same directory.
+\
+\  This demo program for WFXX.EXE shows you how to use it.
+\
+\  hcchen5600 2010/06/10 13:25:12
+
+cr
+( 01 ) .( compiling utility.f01 )
+( 02 ) .( loadlibrary utility.dll )
+( 03 ) loadlibrary utility.dll ?exit
+( 04 ) utility.dll @ 0 0 winapi AboutUtility  ?exit    \ [ -- Stringz ]
+( 05 ) utility.dll @ 2 2 winapi EcramReadByte ?exit    \ [ index &data -- OK ]
+( 06 ) cr .( Try to execute 'AboutUtility' )
+( 07 ) AboutUtility puts                    \ Try to use the new command word 'AboutUtility', it prints greeting messages.
+( 08 ) .( Try to execute 'EcramReadByte' to read ECRAM index $F3 )
+( 09 ) variable &data                       \ Try to use 'EcramReadByte'. It needs a variable to store return value.
+( 10 ) $f3 &data EcramReadByte .s .( returned error code stays in top of stack )
+( 11 ) .( ECRAM index $F3 data is :) &data @ .b cr
+
+bye

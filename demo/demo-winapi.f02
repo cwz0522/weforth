@@ -1,0 +1,163 @@
+
+.( load user32.dll dynamic library )
+loadlibrary user32.dll ?exit            \ 'loadlibrary' is from Sir yap's demo in KsanaVM forth tutorial.
+                                        \ user32.dll at this moment is a string of filename.
+                                        \ after loadlibrary will successfully do its job, 'user32.dll' become a new command word.
+                                        \ As a command word, 'user32.dll' leaves the pointer to DLL user32.dll.
+
+.( get 'MessageBoxA' function from user32.dll )
+user32.dll @                            \ Get 'user32.dll' address
+4 0 winapi MessageBoxA ?exit            \ 'winapi' [ DLL-address n -- error ] gets an export function from the given DLL.
+                                        \ in this example, 'winapi' gets the exported function 'MessageBoxA' from user32.dll
+                                        \ and assign the save name 'MessageBoxA' to the function.
+                                        \ Where n is 'MessageBoxA' function's input argument number. In this exampke, it needs
+                                        \ 4 arguments as shown below C++ function prototype,
+                                        \
+                                        \    int WINAPI MessageBoxA(
+                                        \      __in_opt  HWND hWnd,
+                                        \      __in_opt  LPCTSTR lpText,
+                                        \      __in_opt  LPCTSTR lpCaption,
+                                        \      __in      UINT uType
+                                        \    );
+                                        \
+                                        \ Forth stack diagram [ 0 s" Text" s" Caption" type -- response ]
+
+.( Test using it . . . )
+: test 0 s" hello, world!" s" WinApi Test" 0 MessageBoxA ;    \ see, there are 4 arguments before calling MessageBoxA
+test .ss                                                      \ MessageBoxA returns an error code let's check it out in the stack.
+
+.( Init Sleep command )
+loadlibrary kernel32.dll ?exit          \ 'loadlibrary' is from Sir yap's demo in KsanaVM forth tutorial.
+kernel32.dll @                          \ Get 'user32.dll' address
+1 0 winapi Sleep ?exit                  \ Suspends the execution of the current thread until the time-out interval elapses. To enter an alertable wait state, use the SleepEx function.
+                                        \
+                                        \   VOID WINAPI Sleep(
+                                        \     __in  DWORD dwMilliseconds
+                                        \   );
+                                        \
+                                        \ Forth stack diagram [ milliseconds -- ]
+
+
+.( Init GetKeyState command )
+user32.dll @                            \ Get 'user32.dll' address
+1 0 winapi GetKeyState ?exit            \ Retrieves the status of the specified virtual key. The status specifies whether the key is up, down, or toggled (on, off¡Xalternating each time the key is pressed).
+                                        \
+                                        \   SHORT WINAPI GetKeyState(
+                                        \     __in  int nVirtKey   // A virtual key. If the desired virtual key is a letter or digit (A through Z, a through z, or 0 through 9), nVirtKey must be set to the ASCII value of that character. For other keys, it must be a virtual-key code.
+                                        \   );
+                                        \
+                                        \ Forth stack diagram [ nVirtKey -- status ]
+
+.( Init GetAsyncKeyState command )
+user32.dll @                            \ Get 'user32.dll' address
+1 0 winapi GetAsyncKeyState ?exit       \ Determines whether a key is up or down at the time the function is called, and whether the key was pressed after a previous call to GetAsyncKeyState.
+                                        \
+                                        \   SHORT WINAPI GetAsyncKeyState(
+                                        \     __in  int vKey                  // A virtual key. If the desired virtual key is a letter or digit (A through Z, a through z, or 0 through 9), nVirtKey must be set to the ASCII value of that character. For other keys, it must be a virtual-key code.
+                                        \   );
+                                        \
+                                        \ Forth stack diagram [ nVirtKey -- status ]
+
+: test-GetAsyncKeyState
+     100 0 do
+         27  GetAsyncKeyState if . cr then
+         500 Sleep
+     loop ;
+
+
+\ All other console mode WinAPI http://msdn.microsoft.com/en-us/library/ms682073%28v=VS.85%29.aspx
+
+.( Init GetConsoleTitleW command )
+
+\ Kernel32.dll http://msdn.microsoft.com/en-us/library/ms683174%28v=VS.85%29.aspx
+\ DWORD WINAPI GetConsoleTitle(     // actually GetConsoleTitleA(failed on my Vista) or GetConsoleTitleW(OK on my Vista) 
+\   __out  LPTSTR lpConsoleTitle, 
+\   __in   DWORD nSize            
+\ );                              
+
+kernel32.dll @
+2 0 winapi GetConsoleTitleW ?exit  \ [ string-buffer size -- ] Retrieves the title for the current console window.
+
+create temp-buffer 516 allot
+
+: putsw   ( stringW -- )
+  1000 0 do
+                            \ stringW
+      dup i + c@            \ stringW stringW[i]
+      dup if
+      	.c                  \ stringW
+      else
+        drop                \ empty
+        r> r> drop dup >r >r  \ terminate do loop
+      then  
+  2 +loop
+;  
+
+: show-console-title  ( -- )
+     temp-buffer 512 GetConsoleTitleW
+     temp-buffer putsw
+;                   
+show-console-title cr
+
+.( init GetStdHandle )
+\ Kernel32.dll  http://msdn.microsoft.com/en-us/library/ms683231%28v=VS.85%29.aspx
+\   HANDLE WINAPI GetStdHandle(          Retrieves a handle to the specified standard device (standard input, standard output, or standard error).
+\     __in  DWORD nStdHandle
+\   );
+\ 
+\ nStdHandle can be one of belows :
+\ 	STD_INPUT_HANDLE  (DWORD)-10
+\ 	STD_OUTPUT_HANDLE (DWORD)-11
+\ 	STD_ERROR_HANDLE  (DWORD)-12
+
+kernel32.dll @
+1 0 winapi GetStdHandle ?exit       \ [ nStdHandle -- HANDLE ]
+  
+\ Test result   
+\ ok>dropall -10 GetStdHandle .d cr
+\ 00000003
+\ 
+\ ok>dropall -11 GetStdHandle .d cr
+\ 00000007
+\ 
+\ ok>dropall -12 GetStdHandle .d cr
+\ 0000000b
+
+.( init ReadConsoleInput )
+\ Kernel32.lib http://msdn.microsoft.com/en-us/library/ms684961%28v=VS.85%29.aspx
+\ Reads data from a console input buffer and removes it from the buffer.
+\ BOOL WINAPI ReadConsoleInput(
+\   __in   HANDLE hConsoleInput,         \ -10 GetStdHandle
+\   __out  PINPUT_RECORD lpBuffer,       \ I found it stores 5 dwords for every make-code or break-code of a key  buffer[1]=1 down, buffer[2]=
+\   __in   DWORD nLength,                \ lpBuffer's array elements
+\   __out  LPDWORD lpNumberOfEventsRead  \ dword container
+\ );
+\ 
+
+kernel32.dll @
+4 0 winapi ReadConsoleInputA ?exit       \ [ (-10 GetStdHandle) buffer length &_waitkey_NumberOfEventsRead -- OK ]
+
+create _waitkey_buffer 256 allot
+variable &_waitkey_NumberOfEventsRead
+
+: waitkey    ( -- keycode )
+	-10 GetStdHandle _waitkey_buffer 10 &_waitkey_NumberOfEventsRead ReadConsoleInputA drop \ I don't think ReadConsoleInputA can be failed
+	_waitkey_buffer 2 CELLS + @
+;
+
+.( test ReadConsoleInputA )
+: test   
+     dropall
+     ." Press a key to see what ReadConsoleInputA received for key down and key up" cr
+     ." Original temp-buffer " cr
+     temp-buffer 512 0xff fill
+     temp-buffer d d drop
+     10 0 do
+         -10 GetStdHandle temp-buffer 5 &_waitkey_NumberOfEventsRead ReadConsoleInputA cr 
+         ." #" i . ."  " .d ."  Error code " cr
+         &_waitkey_NumberOfEventsRead ? ."  &_waitkey_NumberOfEventsRead " cr
+         cr ." Dump temp-buffer " cr
+         temp-buffer d d drop
+         temp-buffer 512 0xff fill
+     loop
+;     

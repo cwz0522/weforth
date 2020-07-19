@@ -1,0 +1,226 @@
+findword help.f01 ?stop-include-this-file   \ 'help.f01' defined at the bottom of this file
+findword message_switch ?stop-include-this-line &vm->greetingswitch @ constant message_switch
+0 &vm->greetingswitch !          \ turn off .( messages )
+
+.( compiling help.f01 )
+.( Make a 'help' command. )
+
+.( define help10 )
+: help10 	( -- )   \ help file part 10
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 10  %%%%%%%%%%%%%%%%%%%%% " cr cr
+            ." ESC to stop, Anykey to continue,  help11 command for more info . . . " waitkey drop \ help11
+;
+
+.( define help9 )
+: help9 	( -- )   \ help file part 9
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 9  %%%%%%%%%%%%%%%%%%%%% " cr cr
+            ." ESC to stop, Anykey to continue,  help10 command for more info . . . " waitkey 0x001b0001 != if help10 then
+;
+
+.( define help8 )
+: help8 	( -- )   \ help file part 8
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 8  %%%%%%%%%%%%%%%%%%%%% " cr cr
+            ." ESC to stop, Anykey to continue,  help9 command for more info . . . " waitkey 0x001b0001 != if help9 then
+;
+
+.( define help7 )
+: help7 	( -- )   \ help file part 7
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 7  %%%%%%%%%%%%%%%%%%%%% " cr cr
+            ." ESC to stop, Anykey to continue,  help8 command for more info . . . " waitkey 0x001b0001 != if help8 then
+;
+
+.( define help6 )
+: help6 	( -- )   \ help file part 6
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 6  %%%%%%%%%%%%%%%%%%%%% " cr cr
+
+            ."                                                          " cr
+            ." ESC to stop, Anykey to continue,  help7 command for more info . . . " waitkey 0x001b0001 != if help7 then
+;
+
+
+.( define help5 )
+: help5 	( -- )   \ help file part 5
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 5  %%%%%%%%%%%%%%%%%%%%% " cr cr
+
+            ." 'gotoxy'   ( x y -- ) Moves console mode cursor to (x,y) position. " cr
+            ." 'wherexy'  ( -- x y ) Get recent console mode cursor position. " cr
+            ." 'cls'      ( -- )     clears screen. " cr cr
+            ." 'SetScreenAttribute'  ( 0xBF -- ) " cr
+            ."     Set console text Background and Foreground attribute. " cr
+            ."     Example: 0x87 SetScreenAttribute   \ gray background white characters " cr cr
+
+            ." 'type'     ( string size -- ) " cr
+            ."     This is forth standard print string command. Similar to C's puts. But " cr
+            ."     'type' requires string length. We already have puts defined in common.f08" cr
+            ."     so you don't use this command anyway. I in fact didn't refer to the given" cr
+            ."     string length, so if you want to try it then give it a dummy number at " cr
+            ."     the length position works fine. s" $22 putc ."  string's address -4 dword" cr
+            ."     is its length, FYR." cr cr
+
+            ." 'branch' and 'zbranch' " cr
+            ."     They are very smart very tricky forth command words. They are used to make" cr
+            ."     do-loop, if-then-else, .. etc forth internal command words. I am still " cr 
+            ."     studying how to use them, I guess we never need to use these internal " cr
+            ."     commands." cr cr
+
+            ." ESC to stop, Anykey to continue,  help6 command for more info . . . " waitkey 0x001b0001 != if help6 then
+;
+
+.( define help4 )
+: help4 	( -- )   \ help file part 4
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 4  %%%%%%%%%%%%%%%%%%%%% " cr cr
+
+            ." 'execute' ( CFA -- ... ) " cr
+            ."     you usually won't use it. It executes the given CFA in TOS. Where CFA" cr
+            ."     is a forth command word's execution entry point. " cr cr
+            ." For example: " cr
+            ."     3 7         \ put 3 and 7 in stack" cr
+            ."     ' +         \ get + command's CFA. The ' reads 'tick' is a standard word." cr
+            ."     execute     \ execute '+' comamnd's CFA equals to execute '+' command " cr
+            ."     .s          \ check the result, should be 10 " cr cr
+
+            ." 'and', 'or', 'xor'   ( n1 n2 -- result )" cr
+            ."     These 3 command words are 32 bits bit-wise logical operaters. " cr cr
+
+            ." 'not'    ( n1 -- !n1 ) " cr
+            ."     Note! this command word flips 0 to -1 , and flips anything else to 0." cr
+            ."     It's not like above 3 words. It's a logical NOT operater. If you " cr
+            ."     need to do bit-wise 'not' operation, use 'number -1 xor' instead." cr cr
+
+            ." 'call-c-function', 'c-function-entry' " cr
+            ."     These two words are for C function calls. common.f08 already used " cr
+            ."     them to create c functions like 'printf', 'scanf', 'fopen', ... etc " cr
+            ."     Therefore you don't have a chance to use them I think." cr cr
+
+            ." ESC to stop, Anykey to continue,  help5 command for more info . . . " waitkey 0x001b0001 != if help5 then
+;
+
+.( define help3 )
+: help3 	( -- )   \ help file part 3
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 3  %%%%%%%%%%%%%%%%%%%%% " cr cr
+
+            ." '.ss'   to show both data stack and return stack. " cr cr
+
+            ." Like CPU's stack, Forth return-stack is also a very critical thing. It must be" cr
+            ." always balanced before leaving a command word. do-loop and colon words use " cr
+            ." return stack to store their intermediate data values. If you mess it up, the " cr
+            ." do-loop will crazy or the program will be out of control after return the " cr
+            ." recent colon word to a uncertain place ! " cr cr
+
+            \ ." '.'     To print TOS (top of stack) as a decimal number.  " cr
+            \ ." '+ -'   Math operaters. " cr
+            \ ." '* /'   Now try " $22 putc ."  1 2 + . " $22 putc ."  and <Enter>. See '3' ? " cr cr
+            \ ." Forth VM is a stack machine, it doesn't  " cr
+
+            ." Let's follow the 'words' list to explain some words, '=' is to compare the top " cr
+            ." two numbers in forthe stack. The forth command word that assigns a value to a " cr
+            ." variable is '!' read 'store'. " cr cr
+
+            ." Example : " cr
+            ."     variable x  \ define a variable" cr
+            ."     123 x !     \ stores 123 to x" cr
+            ."     x ?         \ see x's value" cr cr
+
+            ." '>r'  push TOS to return stack. " cr
+            ." 'r>'  pop  top of return stack to data stack. " cr
+            ." 'r@'  copy top of return stack to data stack without removing it." cr cr
+
+            ." ESC to stop, Anykey to continue,  help4 command for more info . . . " waitkey 0x001b0001 != if help4 then
+            ;
+
+.( define help2 )
+: help2 	( -- )   \ help file part 2
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 2  %%%%%%%%%%%%%%%%%%%%% " cr cr
+
+            ." 'words' also lists all available command words but in a more beautiful way." cr
+            ."         Make sure you have common.f08 or newer at the working folder. " cr
+            ."         WFxx.EXE itself only has very few commands, many commands are defined" cr
+            ."         by .f files. common.f08 is one of them. This help is from a .f too." cr cr
+
+            ." Read common.f08 or newer. It's a good example itself. WFXX.exe automatically" cr
+            ." read autoexec.f and execute every line in it like they are typed in from your" cr
+            ." fingers at program start up. The verb is 'include' and it is a WFXX command " cr
+            ." word too. " cr cr
+
+            ." autoexec.f 'include' common.f08, help.f01 (this file) and other .f files. " cr
+            ." autoexec.f also includes argv[1] when it exists like F language. So argv[1] " cr
+            ." being treated as a forth script file is defined by autoexec.f not WFXX itself." cr cr
+
+            ." After included argv[1], autoexec.f will proceed to execute argv[2], argv[3]... " cr
+            ." like they are all forth command words or numbers. Again, like F language does." cr cr
+
+            ." When argv[2] exists, WFXX will not show the greeting message and will return to" cr
+            ." DOS after gone through all argv[..] words. When there's no argv[2], autoexec.f " cr
+            ." will try to 'include' argv[1] and then stay in the forth prompt." cr cr
+
+            ." ESC to stop, Anykey to continue,  help3 command for more info . . . " waitkey 0x001b0001 != if help3 then
+            ;
+
+
+.( define help )
+: help 		( -- )   \ help file part 1
+            cr cr cr
+            \  0        1         2         3         4         5         6         7         8
+            \  12345678901234567890123456789012345678901234567890123456789012345678901234567890
+            ."   %%%%%%%%%%%%%%%%%%%%%  WF" s" %02d " version 1 printf ." Quick Help part 1  %%%%%%%%%%%%%%%%%%%%% " cr cr
+
+            ." Did you know? OLPC's 'BIOS' kernel itself is actually a forth engine. " cr
+            ." If you are looking for a beginner's guide, 'OLPC forth lessons' is the " cr
+            ." best tutorial.  http://wiki.laptop.org/go/Forth_Lessons " cr cr
+
+            ." I think the best way to explain all the WFXX.exe command words is Wiki" cr
+            ." http://mfgkm-wks.wistron.com/RD/Software/WF06%20command%20words.aspx " cr
+            ." It's Wiki, you know, you're welcome to help improve it." cr cr
+
+            ." 'bye'   Return to DOS. " cr
+            ." 'exit'  Samething as C language's exit(), terminate program immediately." cr cr
+
+            ." Both bye and exit return the TOS (top of stack) to errorlevel. " cr cr
+
+            ." 'WORDS' To list all available command words. Note, case sensitive!" cr cr
+
+            ." '.s'    To show data stack. 'dropall' clears them all. " cr cr
+
+            ." 1 2 3   to put decimal numbers 1 2 3 into data stack. Leading 0 not required" cr
+            ." $A1B8   to put a hex number $A1B8 into data stack." cr
+            ." 0xA1B8  does the same thing." cr cr
+
+            ." This help file itself is help.f01. I won't explain every word but most" cr
+            ." important things WFXX unique. Refer to demo-<something>.f files that demo most" cr 
+            ." normal commands.  " cr
+            ."                                               H.C. Chen 2010/06/09 14:40:40 " cr cr
+
+            ." ESC to stop, Anykey to continue,  help2 command for more info . . . " waitkey 0x001b0001 != if help2 then
+            ;
+
+1 constant help.f01
+.( help.f01 done )
+message_switch &vm->greetingswitch ! \ restore .( messages ) switch
+

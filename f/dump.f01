@@ -1,0 +1,60 @@
+findword dump.f01 ?stop-include-this-file \ 'dump.f01' defined at the bottom of this file
+findword message_switch ?stop-include-this-line &vm->greetingswitch @ constant message_switch
+0 &vm->greetingswitch !          \ turn off .( messages )
+
+.( compiling dump.f01 )
+.( Make a 'd' command. Like debug.exe's d command that dumps memory )
+
+.( _d-print-8-bytes d command internal routine. print 8 bytes hexdecimal )
+: _d-print-8-bytes   ( addr -- addr+8 )
+    8 0 do
+                                 \ addr
+        dup c@                   \ addr byte
+        .b ."  "     \ addr          print the first byte in hexdecimal
+        1 +                      \ addr+1
+    loop
+;
+.( .c d command internal routine. print visiable characters. Print '.' for non-printable characters.)
+: .c     ( char -- )        \ print visiable characters. Print '.' for non-printable characters.
+    $FF and 
+    >r                           \ save the char in return stack
+    r@   0 =                     \ f
+    r@  10 =                     \ f f
+    r@ 129 >=                    \ f f f
+    r@ 255 <=                    \ f f f f
+    AND                          \ f f f
+    r@  13 =                     \ f f f f
+    r@   7 =                     \ f f f f f
+    r@   8 =                     \ f f f f f f
+    r@   9 =                     \ f f f f f f f
+    OR OR OR OR OR OR            \ f
+    if r> drop ." ." else r> putc then
+    ;
+.( _d-print-16-bytes d command internal routine. print 16 characters )
+: _d-print-16-bytes   ( addr -- )
+    16 0 do
+                                 \ addr
+        dup c@                   \ addr byte
+        .c                  \ addr          print character
+        1 +                      \ addr+1
+    loop
+;
+
+.( d command , dump memory like debug.exe's d command )
+: _d ( address -- address+16 )   \ dump memory
+                                 \ addr
+    dup                          \ addr addr
+    .d ." : "                     \ addr          print the adress at beginning of the line
+    dup _d-print-8-bytes         \ addr addr+8
+    ." - "
+    _d-print-8-bytes             \ addr addr+16
+    drop                         \ addr
+    ."  "
+    _d-print-16-bytes cr         \ [ empty ]
+;
+: d  ( address -- address+16n )  \ dump memory, leave next address on TOS
+    _d _d _d _d ;
+
+1 constant dump.f01
+.( dump.f01 done )
+message_switch &vm->greetingswitch ! \ restore .( messages ) switch

@@ -1,0 +1,50 @@
+\
+\  utility.dll , Access32.sys is from WHQ TE. See WKS software RD Lawrence Tang's introductions
+\           http://elearnwksrd.wistron.com.cn/xms/content/show.php?id=1184
+\           http://elearnwksrd.wistron.com.cn/xms/forum/show.php?id=2587
+\  put wfxx.exe , this .f , utility.dll and Access32.sys at the same directory.
+\
+\  This demo program for WFXX.EXE shows you how to use it.
+\
+\  hcchen5600 2010/06/10 13:25:12
+
+findword utility.f01 ?stop-include-this-file  \ if defined then skip
+findword message_switch ?stop-include-this-line &vm->greetingswitch @ constant message_switch
+0 &vm->greetingswitch !          \ 0 to turn off .( messages ), others to turn on. Up to you.
+
+.( compiling utility.f01 )
+.( loadlibrary utility.dll )
+loadlibrary utility.dll ?exit
+utility.dll @ 0 0 winapi AboutUtility  ?exit      \ [ -- Stringz ]
+utility.dll @ 0 0 winapi DrainStop       ?exit    \ [ -- ]                          UTILITY_API(void) DrainStop(void);
+utility.dll @ 0 0 winapi IsDrain         ?exit    \ [ -- IsDrain ]                  UTILITY_API(bool) IsDrain(void);
+utility.dll @ 1 1 winapi DrainRun        ?exit    \ [ iLevel -- ]                   UTILITY_API(void) DrainRun(int iLevel);
+utility.dll @ 1 1 winapi AdapterOn       ?exit    \ [ bFlag -- yes ]                UTILITY_API(bool) AdapterOn(bool bFlag);
+utility.dll @ 1 1 winapi ChargeOn        ?exit    \ [ bFlag -- yes ]                UTILITY_API(bool) ChargeOn(bool bFlag);
+utility.dll @ 1 1 winapi GetBattTher     ?exit    \ [ piThermal -- yes ]            UTILITY_API(bool) GetBattTher(int* piThermal);  //C
+utility.dll @ 1 1 winapi GetBattCurr     ?exit    \ [ piCurrent -- yes ]            UTILITY_API(bool) GetBattCurr(int* piCurrent);  //mA
+utility.dll @ 1 1 winapi GetBattCap      ?exit    \ [ piCapacity -- yes ]           UTILITY_API(bool) GetBattCap   (int* piCapacity);  //%
+utility.dll @ 1 1 winapi GetBattVol      ?exit    \ [ piVoltage  -- yes ]           UTILITY_API(bool) GetBattVol   (int* piVoltage );  //mV
+utility.dll @ 2 2 winapi GetBattStatus   ?exit    \ [ iBattIdx pbStatus -- yes ]    UTILITY_API(bool) GetBattStatus(int iBattIdx, BYTE* pbStatus);
+utility.dll @ 1 1 winapi GetBattAlarm    ?exit    \ [ pwAlarm -- yes ]              UTILITY_API(bool) GetBattAlarm (WORD* pwAlarm);
+utility.dll @ 2 2 winapi GetBattValue    ?exit    \ [ byDataOffset pwData -- yes ]  UTILITY_API(bool) GetBattValue (BYTE byDataOffset, WORD* pwData);
+utility.dll @ 1 1 winapi SetBatteryId    ?exit    \ [ ID -- ]                       UTILITY_API(void) SetBatteryId(int ID);  //GetBattXxx returns data with corresponding ID
+utility.dll @ 3 3 winapi FanSpeed        ?exit    \ [ bStart -- yes ]               UTILITY_API(bool) FanSpeed      (int iFanId, bool bIsGet, int* piSpeed);  //RPM
+utility.dll @ 1 1 winapi FanOnOffCtrl    ?exit    \ [ iFanId bFlag -- yes ]         UTILITY_API(bool) FanOnOffCtrl  (bool bStart                );
+utility.dll @ 2 2 winapi FanOn           ?exit    \ [ iSensor piThermal -- yes ]    UTILITY_API(bool) FanOn         (int iFanId, bool bFlag     );
+utility.dll @ 2 2 winapi GetThermal      ?exit    \ [ bIndex bData -- yes ]         UTILITY_API(bool) GetThermal    (int iSensor,int* piThermal ); //C
+utility.dll @ 2 2 winapi EcramWriteByte  ?exit    \ [ bIndex wData -- yes ]         UTILITY_API(bool) EcramWriteByte(BYTE bIndex, BYTE bData    );
+utility.dll @ 2 2 winapi EcramWriteWord  ?exit    \ [ bIndex pbData -- yes ]        UTILITY_API(bool) EcramWriteWord(BYTE bIndex, WORD wData    );
+utility.dll @ 2 2 winapi EcramReadByte   ?exit    \ [ bIndex pwData -- yes ]        UTILITY_API(bool) EcramReadByte (BYTE bIndex, BYTE* pbData  );
+utility.dll @ 2 2 winapi EcramReadWord   ?exit    \ [ bIndex pwData -- yes ]        UTILITY_API(bool) EcramReadWord (BYTE bIndex, WORD* pwData  );
+utility.dll @ 6 6 winapi Int15           ?exit    \ [ &EAX &EBX &ECX &EDX &ESI &EDI-- yes ] UTILITY_API(bool) Int15 (DWORD &EAX, DWORD &EBX, DWORD &ECX, DWORD &EDX, DWORD &ESI, DWORD &EDI);
+utility.dll @ 1 1 winapi Int15ByReg      ?exit    \ [ &Regs -- yes ]                UTILITY_API(bool) Int15ByReg    (REGISTERS &Regs);
+utility.dll @ 1 1 winapi SetLogPath      ?exit    \ [ sPath -- ]                    UTILITY_API(void) SetLogPath    (LPCTSTR sPath);
+utility.dll @ 1 1 winapi WriteLog        ?exit    \ [ format -- ]                   UTILITY_API(void) WriteLog      (const TCHAR *format, ...);
+
+cr AboutUtility puts                              \ Try to use the new command word 'AboutUtility', it prints greeting messages.
+
+1 constant utility.f01
+.( utility.f01 done )
+message_switch &vm->greetingswitch ! \ restore .( messages ) switch
+
